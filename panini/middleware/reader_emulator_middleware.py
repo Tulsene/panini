@@ -37,7 +37,7 @@ class ReaderEmulatorMiddleware(Middleware):
             emulator.wait_for_readiness()
 
     async def listen_any(self, message: Msg, callback):
-        message.subject = message.subject[len(self._prefix) + 1 :]
+        message.subject = message.subject[len(self._prefix) + 1:]
         response = await callback(message)
         return response
 

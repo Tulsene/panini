@@ -5,6 +5,7 @@ from panini import app as panini_app
 
 RESPONSE = {"on_start_task_finished": False}
 
+
 def run_panini():
     app = panini_app.App(
         service_name="test_request",

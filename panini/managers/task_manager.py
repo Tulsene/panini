@@ -38,6 +38,7 @@ class TaskManager:
         def wrapper(task):
             self._check_task(task)
             self._on_start_tasks.append(task)
+
         return wrapper
 
     def register_task(self, interval: Union[float, int] = None):
@@ -53,6 +54,7 @@ class TaskManager:
         def wrapper(task):
             self._check_task(task)
             self._tasks.append(task)
+
         # self._loop.create_task(task())
         return wrapper
 
@@ -62,6 +64,7 @@ class TaskManager:
             interval_task = self.wrapper_for_interval_task(interval, task)
             self._tasks.append(interval_task)
             # self._loop.create_task(interval_task())
+
         return wrapper
 
     def wrapper_for_interval_task(self, interval, task):
@@ -89,5 +92,3 @@ class TaskManager:
         loop = asyncio.get_event_loop()
         for task in self._tasks:
             loop.create_task(task())
-
-

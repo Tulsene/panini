@@ -12,8 +12,6 @@ def run_panini():
         logger_in_separate_process=False,
     )
 
-
-
     @app.listen("test_parameter_listen_subject_only_if_exclude.start")
     async def start(msg):
         return {"data": 1}

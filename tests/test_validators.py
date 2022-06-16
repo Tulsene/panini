@@ -25,7 +25,11 @@ def run_panini():
     def validation_error_cb(msg, error):
         return {"success": False, "error": "validation_error_cb"}
 
-    @app.listen("test_validator.foo-with-error-cb", validator=DataValidator, validation_error_cb=validation_error_cb)
+    @app.listen(
+        "test_validator.foo-with-error-cb",
+        validator=DataValidator,
+        validation_error_cb=validation_error_cb,
+    )
     async def publish(msg):
         return {"success": True}
 
@@ -80,4 +84,3 @@ def test_request_with_incorrect_message_error_cb(client):
     assert response["success"] is False
     assert "error" in response
     assert "validation_error_cb" in response["error"]
-

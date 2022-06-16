@@ -7,11 +7,12 @@ from _wss_manager import WSSManager, html
 
 app = panini_app.App(
     service_name="async_NATS_WSS_bridge",
-    host='127.0.0.1',
+    host="127.0.0.1",
     port=4222,
 )
 app.setup_web_server(port=5001)
 logger = app.logger
+
 
 async def incoming_messages_callback(subscriber, msg, **kwargs):
     """
@@ -25,6 +26,7 @@ async def incoming_messages_callback(subscriber, msg, **kwargs):
     except Exception as e:
         logger.error(f"error: {str(e)}")
 
+
 manager = WSSManager(app)
 manager.callback = incoming_messages_callback
 
@@ -37,6 +39,7 @@ test_msg = {
     "key6": {"subkey1": "1", "subkey2": 2, "3": 3, "4": 4, "5": 5},
     "key7": None,
 }
+
 
 @app.task(interval=1)
 async def publish_periodically_for_test():
@@ -61,7 +64,7 @@ async def web_endpoint_listener(request):
 
 @app.http.get("/stream")
 async def web_endpoint_listener(request):
-    """WebSocket connection """
+    """WebSocket connection"""
     ws = web.WebSocketResponse()
     await ws.prepare(request)
     connection_id = str(uuid.uuid4())[:10]

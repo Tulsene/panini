@@ -11,7 +11,7 @@ app = panini_app.App(
     service_name="custom_logger_example",
     host="127.0.0.1",
     port=4222,
-    custom_logger=logger
+    custom_logger=logger,
 )
 
 log = app.logger

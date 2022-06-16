@@ -14,7 +14,7 @@ def run_panini():
         service_name="test_wss",
         host="127.0.0.1",
         port=4222,
-        logger_in_separate_process=False
+        logger_in_separate_process=False,
     )
 
     app.setup_web_server(port=1111)
@@ -85,6 +85,8 @@ def test_wss_bridge(client):
     response = json.loads(client.websocket_session.recv())
 
     assert response["success"] is True
-    assert response["message"] == "Successfully unsubscribed from event: test_wss.foo.bar"
+    assert (
+        response["message"] == "Successfully unsubscribed from event: test_wss.foo.bar"
+    )
 
     client.websocket_session.close()
