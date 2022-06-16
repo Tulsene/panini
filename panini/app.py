@@ -23,22 +23,22 @@ _app = None
 
 class App:
     def __init__(
-            self,
-            host: str = None,
-            port: int or str = None,
-            service_name: str = "panini_microservice_" + str(uuid.uuid4())[:10],
-            servers: list = None,
-            client_nats_name: str = None,
-            reconnect: bool = False,
-            max_reconnect_attempts: int = 60,
-            reconnecting_time_sleep: int = 2,
-            allocation_queue_group: str = "",
-            logger_required: bool = True,
-            logger_files_path: str = None,
-            logger_in_separate_process: bool = False,
-            custom_logger: logging.Logger = None,
-            pending_bytes_limit=65536 * 1024 * 10,
-            **kwargs
+        self,
+        host: str = None,
+        port: int or str = None,
+        service_name: str = "panini_microservice_" + str(uuid.uuid4())[:10],
+        servers: list = None,
+        client_nats_name: str = None,
+        reconnect: bool = False,
+        max_reconnect_attempts: int = 60,
+        reconnecting_time_sleep: int = 2,
+        allocation_queue_group: str = "",
+        logger_required: bool = True,
+        logger_files_path: str = None,
+        logger_in_separate_process: bool = False,
+        custom_logger: logging.Logger = None,
+        pending_bytes_limit=65536 * 1024 * 10,
+        **kwargs,
     ):
         """
         :param host: NATS broker host
@@ -80,7 +80,7 @@ class App:
                 max_reconnect_attempts=max_reconnect_attempts,
                 reconnecting_time_wait=reconnecting_time_sleep,
                 pending_bytes_limit=pending_bytes_limit,
-                **kwargs
+                **kwargs,
             )
 
             self.app_root_path = get_app_root_path()
@@ -139,9 +139,20 @@ class App:
 
         self.http = web.RouteTableDef()  # for http decorator
         if web_app:
-            self.http_server = HTTPServer(routes=self.http, loop=self.loop, web_app=web_app, web_server_params=params)
+            self.http_server = HTTPServer(
+                routes=self.http,
+                loop=self.loop,
+                web_app=web_app,
+                web_server_params=params,
+            )
         else:
-            self.http_server = HTTPServer(routes=self.http, loop=self.loop, host=host, port=port, web_server_params=params)
+            self.http_server = HTTPServer(
+                routes=self.http,
+                loop=self.loop,
+                host=host,
+                port=port,
+                web_server_params=params,
+            )
 
     def add_filters(self, include: list = None, exclude: list = None):
         """
@@ -150,18 +161,18 @@ class App:
         return self.nats.add_filters(include, exclude)
 
     def set_logger(
-            self,
-            service_name,
-            app_root_path,
-            logger_files_path,
-            in_separate_process,
-            client_nats_name,
+        self,
+        service_name,
+        app_root_path,
+        logger_files_path,
+        in_separate_process,
+        client_nats_name,
     ):
         if in_separate_process:
             (
                 self.log_listener_queue,
                 self.log_stop_event,
-                self.logger_process
+                self.logger_process,
             ) = logger.set_logger(
                 service_name,
                 app_root_path,
@@ -180,28 +191,27 @@ class App:
         self.logger.logger = logging.getLogger(service_name)
 
     def listen(
-            self,
-            subject: list or str,
-            data_type="json",
-            validator: type = None,
-            validation_error_cb: FunctionType = None,
+        self,
+        subject: list or str,
+        data_type="json",
+        validator: type = None,
+        validation_error_cb: FunctionType = None,
     ):
         return self._event_manager.listen(
             subject=subject,
             data_type=data_type,
             validator=validator,
-            validation_error_cb=validation_error_cb
-
+            validation_error_cb=validation_error_cb,
         )
 
     async def publish(
-            self,
-            subject: str,
-            message,
-            reply_to: str = "",
-            force: bool = False,
-            data_type: type or str = "json",
-            headers: dict = None
+        self,
+        subject: str,
+        message,
+        reply_to: str = "",
+        force: bool = False,
+        data_type: type or str = "json",
+        headers: dict = None,
     ):
         return await self.nats.publish(
             subject=subject,
@@ -209,17 +219,17 @@ class App:
             reply_to=reply_to,
             force=force,
             data_type=data_type,
-            headers=headers
+            headers=headers,
         )
 
     def publish_sync(
-            self,
-            subject: str,
-            message,
-            reply_to: str = "",
-            force: bool = False,
-            data_type: type or str = "json",
-            headers: dict = None
+        self,
+        subject: str,
+        message,
+        reply_to: str = "",
+        force: bool = False,
+        data_type: type or str = "json",
+        headers: dict = None,
     ):
         return self.nats.publish_sync(
             subject=subject,
@@ -227,56 +237,58 @@ class App:
             reply_to=reply_to,
             force=force,
             data_type=data_type,
-            headers=headers
+            headers=headers,
         )
 
     async def request(
-            self,
-            subject: str,
-            message,
-            timeout: int = 10,
-            data_type: type or str = "json",
-            headers: dict = None
+        self,
+        subject: str,
+        message,
+        timeout: int = 10,
+        data_type: type or str = "json",
+        headers: dict = None,
     ):
         return await self.nats.request(
             subject=subject,
             message=message,
             timeout=timeout,
             data_type=data_type,
-            headers=headers
+            headers=headers,
         )
 
     def request_sync(
-            self,
-            subject: str,
-            message,
-            timeout: int = 10,
-            data_type: type or str = "json",
-            headers: dict = None
+        self,
+        subject: str,
+        message,
+        timeout: int = 10,
+        data_type: type or str = "json",
+        headers: dict = None,
     ):
         return self.nats.request_sync(
             subject=subject,
             message=message,
             timeout=timeout,
             data_type=data_type,
-            headers=headers
+            headers=headers,
         )
 
-    def subscribe_new_subject_sync(self, subject: str, callback: CoroutineType, **kwargs):
+    def subscribe_new_subject_sync(
+        self, subject: str, callback: CoroutineType, **kwargs
+    ):
         return self.nats.subscribe_new_subject_sync(subject, callback, **kwargs)
 
     async def subscribe_new_subject(
-            self,
-            subject: str,
-            callback: CoroutineType,
-            init_subscription=False,
-            data_type=None
+        self,
+        subject: str,
+        callback: CoroutineType,
+        init_subscription=False,
+        data_type=None,
     ):
         return await self.nats.subscribe_new_subject(
             subject=subject,
             callback=callback,
             init_subscription=init_subscription,
-            data_type=data_type
+            data_type=data_type,
         )
 
     def unsubscribe_subject_sync(self, subject: str):
@@ -294,16 +306,17 @@ class App:
                 f"panini_events.{self.service_name}.{self.client_nats_name}.started",
                 b"{}",
                 data_type=bytes,
-                force=True
+                force=True,
             )
         )
 
     def start(self):
         if (
-                os.environ.get("PANINI_TEST_MODE")
-                and os.environ.get("PANINI_TEST_MODE_USE_ERROR_MIDDLEWARE", "false")
-                == "true"
+            os.environ.get("PANINI_TEST_MODE")
+            and os.environ.get("PANINI_TEST_MODE_USE_ERROR_MIDDLEWARE", "false")
+            == "true"
         ):
+
             def exception_handler(e, **kwargs):
                 self.logger.exception(f"Error: {e}, for kwargs: {kwargs}")
                 raise
@@ -336,8 +349,6 @@ class App:
             self.http_server.start_server()
         else:
             loop.run_until_complete(asyncio.gather(*tasks))
-
-
 
 
 def get_app() -> App:

@@ -5,7 +5,6 @@ from panini.middleware import Middleware
 
 
 class MiddlewareManager:
-
     def __init__(self):
         self._middlewares = {
             "send_publish_middleware": [],
@@ -23,8 +22,9 @@ class MiddlewareManager:
         self._middlewares = value
 
     def add_middleware(self, middleware_cls: Type[Middleware], *args, **kwargs):
-        assert issubclass(middleware_cls, Middleware), \
-            "Each custom middleware class must be a subclass of Middleware"
+        assert issubclass(
+            middleware_cls, Middleware
+        ), "Each custom middleware class must be a subclass of Middleware"
 
         high_priority_functions = (
             "send_publish",
@@ -33,10 +33,7 @@ class MiddlewareManager:
             "listen_request",
         )
 
-        global_functions = (
-            "send_any",
-            "listen_any"
-        )
+        global_functions = ("send_any", "listen_any")
 
         # check, that at least one function is implemented
         assert any(
@@ -139,8 +136,7 @@ class MiddlewareManager:
             else:
                 if (
                     len(self._middlewares["listen_publish_middleware"]) == 0
-                    and len(self._middlewares["listen_request_middleware"])
-                    == 0
+                    and len(self._middlewares["listen_request_middleware"]) == 0
                 ):
                     return function
 

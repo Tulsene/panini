@@ -13,7 +13,7 @@ def run_panini():
         service_name="test_web_server_separately",
         host="127.0.0.1",
         port=4222,
-        logger_in_separate_process=False
+        logger_in_separate_process=False,
     )
 
     app.setup_web_server(port=8083)

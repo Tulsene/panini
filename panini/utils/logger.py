@@ -63,17 +63,11 @@ def set_logger(
     )
 
     if in_separate_process:
-        (
-            logger_queue,
-            log_stop_event,
-            log_process
-        ) = _set_log_recorder_process(logger_config)
-        _set_main_logging_config(logger_queue)
-        return (
-            logger_queue,
-            log_stop_event,
-            log_process
+        (logger_queue, log_stop_event, log_process) = _set_log_recorder_process(
+            logger_config
         )
+        _set_main_logging_config(logger_queue)
+        return (logger_queue, log_stop_event, log_process)
     else:
         logging.config.dictConfig(logger_config)
         return
@@ -250,9 +244,7 @@ def _emergency_logging() -> None:
 
 
 def _dedicated_listener_process(
-    log_listener_queue: Queue,
-    stop_event: Event,
-    config: dict
+    log_listener_queue: Queue, stop_event: Event, config: dict
 ) -> None:
     logging.config.dictConfig(config)
     log_listener = logging.handlers.QueueListener(log_listener_queue, LogHandler())
@@ -268,18 +260,10 @@ def _set_log_recorder_process(config: dict) -> (Queue, Event, Process):
         listener_process = Process(
             target=_dedicated_listener_process,
             name="listener",
-            args=(
-                log_listener_queue,
-                stop_event,
-                config
-            ),
+            args=(log_listener_queue, stop_event, config),
         )
         listener_process.start()
-        return (
-            log_listener_queue,
-            stop_event,
-            listener_process
-        )
+        return (log_listener_queue, stop_event, listener_process)
 
     except Exception as e:
         _emergency_logging()

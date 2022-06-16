@@ -24,7 +24,6 @@ class _Writer(threading.Thread):
             self._array.append(event)
 
     def run(self):
-
         """
         This is a main method of _Writer.
         It checks the array in order to write it to the file with events

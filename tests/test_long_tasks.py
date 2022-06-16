@@ -26,7 +26,7 @@ def run_panini():
     async def long_task(msg):
         await asyncio.sleep(5)
         msg.data["data"] += 2
-        msg.data['t'] = time.time()
+        msg.data["t"] = time.time()
         return msg.data
 
     app.start()

@@ -65,7 +65,7 @@ class WSSManager:
                     await self.send_to_ws(
                         client_ws_connection,
                         success=True,
-                        message=f"Successfully connected to events: {str(subjects)[1:-1]}"
+                        message=f"Successfully connected to events: {str(subjects)[1:-1]}",
                     )
                 elif action == "unsubscribe":
                     for subject in subjects:
@@ -74,9 +74,7 @@ class WSSManager:
                 logger.exception(f"WSS error: {str(e)} connection_id {connection_id}")
                 try:
                     await self.send_to_ws(
-                        client_ws_connection,
-                        success=False,
-                        message=str(e)
+                        client_ws_connection, success=False, message=str(e)
                     )
                 except Exception as e:
                     logger.error(str(e), level="error")
@@ -85,17 +83,13 @@ class WSSManager:
     async def validate_ws_message(self, client_ws_connection, body, action):
         if action not in ["subscribe", "unsubscribe"]:
             message = f"The user has to specify action in message ('subscribe' or 'unsubscribe'), got {action} instead"
-            await self.send_to_ws(
-                client_ws_connection,
-                success=False,
-                message=message
-            )
+            await self.send_to_ws(client_ws_connection, success=False, message=message)
             raise Exception(message)
         if "subjects" not in body:
             raise Exception("subjects required")
 
     def is_close_connection_message(self, msg):
-        if msg.type == WSMsgType.CLOSE and msg.data in range(1000,1003):
+        if msg.type == WSMsgType.CLOSE and msg.data in range(1000, 1003):
             return True
 
     async def close_ws_client(self, client_ws_connection, conn_id):
@@ -115,10 +109,12 @@ class WSSManager:
         return body["action"] if "action" in body else "subscribe"
 
     async def send_to_ws(self, client_ws_connection, success: bool, message: str):
-        message = json.dumps({
-            'success': success,
-            'message': message,
-        })
+        message = json.dumps(
+            {
+                "success": success,
+                "message": message,
+            }
+        )
         await client_ws_connection.send_str(message)
 
     async def subscribe(self, subject, cb):
@@ -132,22 +128,23 @@ class WSSManager:
             await self.send_to_ws(
                 client_ws_connection,
                 success=False,
-                message=f"The user did not subscribe to event {subject}"
+                message=f"The user did not subscribe to event {subject}",
             )
             return
         await self.app.unsubscribe_subject(subject)
         await self.send_to_ws(
             client_ws_connection,
             success=True,
-            message=f"Successfully unsubscribed from event: {subject}"
+            message=f"Successfully unsubscribed from event: {subject}",
         )
 
     async def get_callback(self, subscriber):
-            if hasattr(self, "callback"):
-                cb = self.callback
-            else:
-                raise Exception("self.callback function for incoming messages expected")
+        if hasattr(self, "callback"):
+            cb = self.callback
+        else:
+            raise Exception("self.callback function for incoming messages expected")
 
-            async def wrapper(msg):
-                return await cb(subscriber, msg)
-            return wrapper
+        async def wrapper(msg):
+            return await cb(subscriber, msg)
+
+        return wrapper

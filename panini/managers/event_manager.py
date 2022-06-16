@@ -24,7 +24,9 @@ class EventManager:
         validation_error_cb: FunctionType = None,
     ):
         def wrapper(function):
-            function = self.wrap_function_by_validator(function, validator, validation_error_cb)
+            function = self.wrap_function_by_validator(
+                function, validator, validation_error_cb
+            )
             if type(subject) is list:
                 for t in subject:
                     self._check_subscription(t)
@@ -34,6 +36,7 @@ class EventManager:
                 self._subscriptions[subject].append(function)
             function.data_type = data_type
             return function
+
         return wrapper
 
     def wrap_function_by_validator(self, function, validator, validation_error_cb):

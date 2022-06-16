@@ -5,6 +5,7 @@ from nats.aio.client import Msg
 
 def run_panini():
     from tests.separate_file.main import app
+
     app.start()
 
 

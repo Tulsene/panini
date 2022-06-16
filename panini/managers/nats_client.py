@@ -17,20 +17,20 @@ nest_asyncio.apply()
 
 class NATSClient:
     def __init__(
-            self,
-            host: Union[str, NoneType],
-            port: Union[int, str],
-            servers: Union[List[str], NoneType],
-            client_nats_name: str,
-            loop: asyncio.AbstractEventLoop,
-            allow_reconnect: Union[bool, NoneType],
-            max_reconnect_attempts: int = 60,
-            reconnecting_time_wait: int = 2,
-            auth: Union[dict, NoneType] = None,
-            queue="",
-            pending_bytes_limit=65536 * 1024 * 10,
-            enable_js: bool = False,
-            **kwargs
+        self,
+        host: Union[str, NoneType],
+        port: Union[int, str],
+        servers: Union[List[str], NoneType],
+        client_nats_name: str,
+        loop: asyncio.AbstractEventLoop,
+        allow_reconnect: Union[bool, NoneType],
+        max_reconnect_attempts: int = 60,
+        reconnecting_time_wait: int = 2,
+        auth: Union[dict, NoneType] = None,
+        queue="",
+        pending_bytes_limit=65536 * 1024 * 10,
+        enable_js: bool = False,
+        **kwargs,
     ):
         """
         :param client_nats_name: instance identifier for NATS, str
@@ -102,13 +102,13 @@ class NATSClient:
     async def _establish_connection(self):
         self.client = NATS()
         if self.servers is None:
-            server = 'nats://' + self.host + ":" + str(self.port)
+            server = "nats://" + self.host + ":" + str(self.port)
             self.servers = [server]
 
         kwargs = {
             "servers": self.servers,
             "name": self.client_nats_name,
-            **self._connection_kwargs
+            **self._connection_kwargs,
         }
         if self.allow_reconnect:
             kwargs["allow_reconnect"] = self.allow_reconnect
@@ -130,42 +130,56 @@ class NATSClient:
             self.print_connect()
 
     def print_connect(self):
-        print('\n======================================================================================')
-        print(f'Panini service connected to NATS..')
+        print(
+            "\n======================================================================================"
+        )
+        print(f"Panini service connected to NATS..")
         print(f"id: {self.client.client_id}")
         print(f"name: {self.client_nats_name}")
-        print(f'\nNATS brokers:')
+        print(f"\nNATS brokers:")
         for i in self.servers:
-            print("* ",i)
-        print('======================================================================================\n')
+            print("* ", i)
+        print(
+            "======================================================================================\n"
+        )
 
-    def add_js_stream(self, name: str, subjects: List[str], config: api.StreamConfig = None, **params):
+    def add_js_stream(
+        self, name: str, subjects: List[str], config: api.StreamConfig = None, **params
+    ):
         if not self.enable_js:
             JetStreamNotEnabledError('Required flag "enable_js" is True')
         self.js_client.add_stream(name=name, subjects=subjects, config=config, **params)
 
-    def subscribe_new_subject_sync(self, subject: str, callback: CoroutineType, **kwargs):
-        self.loop.run_until_complete(self.subscribe_new_subject(subject, callback, **kwargs))
+    def subscribe_new_subject_sync(
+        self, subject: str, callback: CoroutineType, **kwargs
+    ):
+        self.loop.run_until_complete(
+            self.subscribe_new_subject(subject, callback, **kwargs)
+        )
 
     async def subscribe_new_subject(
-            self,
-            subject: str,
-            callback: CoroutineType,
-            init_subscription=False,
-            data_type=None,
-            **kwargs
+        self,
+        subject: str,
+        callback: CoroutineType,
+        init_subscription=False,
+        data_type=None,
+        **kwargs,
     ):
         if data_type == None:
-            data_type = getattr(callback, 'data_type', 'json')
+            data_type = getattr(callback, "data_type", "json")
 
-        callback = self._middleware_manager.wrap_function_by_middleware("listen")(callback)
-        wrapped_callback = _ReceivedMessageHandler(self._publish, callback, data_type).call
+        callback = self._middleware_manager.wrap_function_by_middleware("listen")(
+            callback
+        )
+        wrapped_callback = _ReceivedMessageHandler(
+            self._publish, callback, data_type
+        ).call
         sub = await self.client.subscribe(
             subject,
             queue=self.queue,
             cb=wrapped_callback,
             pending_bytes_limit=self.pending_bytes_limit,
-            **kwargs
+            **kwargs,
         )
 
         if subject not in self.sub_map:
@@ -190,13 +204,13 @@ class NATSClient:
         del self.listen_subjects_callbacks[subject]
 
     def publish_sync(
-            self,
-            subject: str,
-            message,
-            reply_to: str = "",
-            force: bool = False,
-            data_type: type or str = "json",
-            headers: dict = None,
+        self,
+        subject: str,
+        message,
+        reply_to: str = "",
+        force: bool = False,
+        data_type: type or str = "json",
+        headers: dict = None,
     ):
         asyncio.ensure_future(
             self.publish(subject, message, reply_to, force, data_type, headers)
@@ -206,23 +220,23 @@ class NATSClient:
         self.loop.call_soon_threadsafe(self.publish_sync, subject, message)
 
     def request_sync(
-            self,
-            subject: str,
-            message,
-            timeout: int = 10,
-            data_type: type or str = "json",
-            headers: dict = None,
+        self,
+        subject: str,
+        message,
+        timeout: int = 10,
+        data_type: type or str = "json",
+        headers: dict = None,
     ):
         return self.loop.run_until_complete(
             self.request(subject, message, timeout, data_type, headers)
         )
 
     def request_from_another_thread_sync(
-            self,
-            subject: str,
-            message,
-            timeout: int = 10,
-            headers: dict = None,
+        self,
+        subject: str,
+        message,
+        timeout: int = 10,
+        headers: dict = None,
     ):
         try:
             loop = asyncio.get_event_loop()
@@ -233,11 +247,11 @@ class NATSClient:
         )
 
     async def request_from_another_thread(
-            self,
-            subject: str,
-            message,
-            timeout: int = 10,
-            headers: dict = None,
+        self,
+        subject: str,
+        message,
+        timeout: int = 10,
+        headers: dict = None,
     ):
         fut = asyncio.run_coroutine_threadsafe(
             self.request(subject, message, timeout, headers=headers), self.loop
@@ -268,28 +282,30 @@ class NATSClient:
         return message
 
     async def _publish(
-            self,
-            subject: str,
-            message,
-            reply_to: str = '',
-            force: bool = False,
-            data_type: type or str = "json",
-            headers: dict = None,
+        self,
+        subject: str,
+        message,
+        reply_to: str = "",
+        force: bool = False,
+        data_type: type or str = "json",
+        headers: dict = None,
     ):
         message = self.format_message_data_type(message, data_type)
-        await self.client.publish(subject=subject, payload=message, reply=reply_to, headers=headers)
+        await self.client.publish(
+            subject=subject, payload=message, reply=reply_to, headers=headers
+        )
         if force:
             await self.client.flush()
         await asyncio.sleep(0)
 
     async def publish(
-            self,
-            subject: str,
-            message,
-            reply_to: str = None,
-            force: bool = False,
-            data_type: type or str = "json",
-            headers: dict = None,
+        self,
+        subject: str,
+        message,
+        reply_to: str = None,
+        force: bool = False,
+        data_type: type or str = "json",
+        headers: dict = None,
     ):
         return await self._publish_wrapped(
             subject=subject,
@@ -297,19 +313,21 @@ class NATSClient:
             reply_to=reply_to,
             force=force,
             data_type=data_type,
-            headers=headers
+            headers=headers,
         )
 
     async def _request(
-            self,
-            subject: str,
-            message,
-            timeout: int = 10,
-            data_type: type or str = "json",
-            headers: dict = None,
+        self,
+        subject: str,
+        message,
+        timeout: int = 10,
+        data_type: type or str = "json",
+        headers: dict = None,
     ):
         message = self.format_message_data_type(message, data_type)
-        response = await self.client.request(subject, message, timeout=timeout, headers=headers)
+        response = await self.client.request(
+            subject, message, timeout=timeout, headers=headers
+        )
         response = response.data
         if data_type == "json":
             response = ujson.loads(response)
@@ -318,12 +336,12 @@ class NATSClient:
         return response
 
     async def request(
-            self,
-            subject: str,
-            message,
-            timeout: int = 10,
-            data_type: type or str = "json",
-            headers: dict = None,
+        self,
+        subject: str,
+        message,
+        timeout: int = 10,
+        data_type: type or str = "json",
+        headers: dict = None,
     ):
         return await self._request_wrapped(
             subject=subject,
@@ -351,7 +369,9 @@ class NATSClient:
         self.exclude_subjects = exclude
 
     def filter_subjects(self, subscriptions):
-        assert not self.include_subjects or not self.exclude_subjects, "You can use either include or exclude. Not both"
+        assert (
+            not self.include_subjects or not self.exclude_subjects
+        ), "You can use either include or exclude. Not both"
 
         if self.include_subjects:
             for subject in subscriptions.copy():
